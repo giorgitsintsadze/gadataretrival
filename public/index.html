@@ -1,75 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Google Analytics Data Retrieval</title>
+    <title>Google Analytics Data</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-</head>
-<body>
-<div>
-    <label for="start-date">Start Date:</label>
-    <input type="date" id="start-date" />
-    <label for="end-date">End Date:</label>
-    <input type="date" id="end-date" />
-    <button id="fetch-data">Fetch Data</button>
-</div>
+    <style>
+        body {
+            padding: 20px;
+        }
 
-<table id="data-ga" class="table table-striped" style="width:100%">
-    <thead>
-    <tr>
-        <th>Date</th>
-        <th>Sessions</th>
-        <th>New Users</th>
-        <th>Total Revenue</th>
-        <th>Transactions</th>
-        <th>Checkouts</th>
-    </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+        h1 {
+            margin-bottom: 20px;
+        }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#fetch-data').click(function() {
-            const startDate = $('#start-date').val();
-            const endDate = $('#end-date').val();
-            if (startDate && endDate) {
-                $.ajax({
-                    url: '/get-ga-data',
-                    method: 'POST',
-                    data: {
-                        startDate: startDate,
-                        endDate: endDate
-                    },
-                    success: function(data) {
-                        $('#data-ga tbody').empty(); // Clear existing rows
+        form {
+            margin-bottom: 20px;
+        }
 
-                        data.forEach(function(item) {
-                            const row = `<tr>
-                                            <td>${item.date}</td>
-                                            <td>${item.sessions}</td>
-                                            <td>${item.newUsers}</td>
-                                            <td>${item.totalRevenue}</td>
-                                            <td>${item.transactions}</td>
-                                            <td>${item.checkouts}</td>
-                                        </tr>`;
-                            $('#data-ga tbody').append(row);
+        table {
+            width: 100%;
+        }
+
+        th {
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            font-style: italic;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const recordsPerPage = 10;
+            let jsonData = [];
+
+            function loadJSONData(startDate, endDate) {
+                const fileName = `ga_data_${startDate}_${endDate}.json`;
+
+                $.get('/check-file-exists', { fileName: fileName }, function(data) {
+                    if (data.exists) {
+                        $.get('/load-json-file', { fileName: fileName }, function(data) {
+                            jsonData = data;
+                            displayData(1);
+                            displayPagination();
                         });
-
-                        $('#data-ga').DataTable();
-                    },
-                    error: function(error) {
-                        console.error('Error retrieving data:', error);
+                    } else {
+                        $.post('/get-ga-data', { startDate: startDate, endDate: endDate }, function(data) {
+                            jsonData = data;
+                            displayData(1);
+                            displayPagination();
+                        });
                     }
                 });
             }
+
+            function displayData(page) {
+                const dataContainer = $('#data-container');
+                dataContainer.empty();
+
+                const startIndex = (page - 1) * recordsPerPage;
+                const endIndex = page * recordsPerPage;
+                const paginatedData = jsonData.slice(startIndex, endIndex);
+
+                if (paginatedData.length > 0) {
+                    for (const row of paginatedData) {
+                        const rowHtml = `
+              <tr>
+                <td>${row.date}</td>
+                <td>${row.sessions}</td>
+                <td>${row.newUsers}</td>
+                <td>${row.totalRevenue}</td>
+                <td>${row.transactions}</td>
+                <td>${row.checkouts}</td>
+              </tr>
+            `;
+                        dataContainer.append(rowHtml);
+                    }
+                } else {
+                    const noDataHtml = '<tr><td colspan="6" class="no-data">No data available</td></tr>';
+                    dataContainer.append(noDataHtml);
+                }
+            }
+
+            function displayPagination() {
+                const totalPages = Math.ceil(jsonData.length / recordsPerPage);
+
+                const paginationContainer = $('#pagination-container');
+                paginationContainer.empty();
+
+                if (totalPages > 1) {
+                    let paginationHtml = '';
+
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">First</a></li>`;
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="prev">Previous</a></li>`;
+
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                    }
+
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="next">Next</a></li>`;
+                    paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">Last</a></li>`;
+
+                    paginationContainer.html(paginationHtml);
+
+                    paginationContainer.find('a.page-link').click(function(e) {
+                        e.preventDefault();
+                        const page = $(this).data('page');
+                        if (page === 'prev') {
+                            const currentPage = parseInt(paginationContainer.find('.active').find('a').data('page'));
+                            if (currentPage > 1) {
+                                displayData(currentPage - 1);
+                                paginationContainer.find('.active').removeClass('active').prev().addClass('active');
+                            }
+                        } else if (page === 'next') {
+                            const currentPage = parseInt(paginationContainer.find('.active').find('a').data('page'));
+                            if (currentPage < totalPages) {
+                                displayData(currentPage + 1);
+                                paginationContainer.find('.active').removeClass('active').next().addClass('active');
+                            }
+                        } else {
+                            displayData(page);
+                            paginationContainer.find('.active').removeClass('active');
+                            $(this).parent().addClass('active');
+                        }
+                    });
+                }
+            }
+
+            $('form').submit(function(e) {
+                e.preventDefault();
+                const startDate = $('#start-date').val();
+                const endDate = $('#end-date').val();
+
+                loadJSONData(startDate, endDate);
+            });
         });
-    });
-</script>
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Google Analytics Data</h1>
+
+    <form>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date" class="form-control" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date" class="form-control" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Fetch Data</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Sessions</th>
+            <th>New Users</th>
+            <th>Total Revenue</th>
+            <th>Transactions</th>
+            <th>Checkouts</th>
+        </tr>
+        </thead>
+        <tbody id="data-container">
+        <!-- Data will be inserted here ddynamically -->
+        </tbody>
+    </table>
+
+    <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center" id="pagination-container">
+            <!-- pagination links will be here dinamically-->
+        </ul>
+    </nav>
+</div>
 </body>
 </html>

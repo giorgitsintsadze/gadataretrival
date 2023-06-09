@@ -98,13 +98,46 @@ app.get('/', (req, res) => {
 
 app.post('/get-ga-data', async (req, res) => {
     const { startDate, endDate } = req.body;
+    const fileName = `ga_data_${startDate}_${endDate}.json`;
 
     try {
         const data = await getGoogleAnalyticsData(startDate, endDate);
-        res.json(data);
+
+        // Write data to a JSON file
+        fs.writeFile(fileName, JSON.stringify(data), (err) => {
+            if (err) {
+                console.error('Error writing data to file:', err);
+                res.status(500).json({ error: 'Error writing data to file' });
+            } else {
+                res.json(data);
+            }
+        });
     } catch (error) {
+        console.error('Error retrieving data:', error);
         res.status(500).json({ error: 'Error retrieving data' });
     }
+});
+
+app.get('/check-file-exists', (req, res) => {
+    const { fileName } = req.query;
+
+    fs.access(fileName, fs.constants.F_OK, (err) => {
+        res.json({ exists: !err });
+    });
+});
+
+app.get('/load-json-file', (req, res) => {
+    const { fileName } = req.query;
+
+    fs.readFile(fileName, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error loading JSON file:', err);
+            res.status(500).json({ error: 'Error loading JSON file' });
+        } else {
+            const jsonData = JSON.parse(data);
+            res.json(jsonData);
+        }
+    });
 });
 
 app.listen(port, () => {
