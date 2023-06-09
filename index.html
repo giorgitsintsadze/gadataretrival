@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+</head>
+<body>
+<table id="data-ga" class="table table-striped" style="width:100%">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Sessions</th>
+        <th>New Users</th>
+        <th>Total Revenue</th>
+        <th>Transactions</th>
+        <th>Checkouts</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Load JSON data from ga_data.json
+        $.getJSON('ga_data_2023_02_1_2023_06_2.json', function(data) {
+            // Loop through each data object and populate the table
+            $.each(data, function(index, item) {
+                const row = `<tr>
+                                <td>${item.date}</td>
+                                <td>${item.sessions}</td>
+                                <td>${item.newUsers}</td>
+                                <td>${item.totalRevenue}</td>
+                                <td>${item.transactions}</td>
+                                <td>${item.checkouts}</td>
+                            </tr>`;
+                $('#data-ga tbody').append(row);
+            });
+
+            // Initialize DataTables
+            $('#data-ga').DataTable();
+        });
+    });
+</script>
+</body>
+</html>

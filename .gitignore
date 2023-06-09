@@ -1,0 +1,21 @@
+# WebStorm
+.idea/
+
+# Node.js
+node_modules/
+
+# Compiled output
+dist/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+
+# Backup files
+*.bak
+
+# OS-specific files
+.DS_Store
+Thumbs.db
