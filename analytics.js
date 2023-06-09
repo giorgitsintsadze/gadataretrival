@@ -1,8 +1,11 @@
-const readline = require('readline');
+const express = require('express');
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const key = require('./key-ga.json');
 const fs = require('fs');
 const { DateTime } = require('luxon');
+
+const app = express();
+const port = 3000;
 
 const client = new BetaAnalyticsDataClient({
     credentials: {
@@ -54,7 +57,7 @@ async function getGoogleAnalyticsData(startDate, endDate) {
             metrics: row.metricValues.map((value) => value.value),
         }));
 
-        const data = rows.map((row) => {
+        return rows.map((row) => {
             const rawDateValue = row.dimensions[0];
             const parsedDate = DateTime.fromFormat(rawDateValue, 'yyyyMMdd');
             const formattedDate = parsedDate.isValid ? parsedDate.toFormat('yyyy-MM-dd') : rawDateValue;
@@ -70,35 +73,11 @@ async function getGoogleAnalyticsData(startDate, endDate) {
                 checkouts: rowData[5],
             };
         });
-
-        const jsonData = JSON.stringify(data, null, 2);
-        const fileName = `ga_data_${startDate.replace(/-/g, '_')}_${endDate.replace(/-/g, '_')}.json`;
-
-        fs.writeFileSync(fileName, jsonData, 'utf8');
-
-        console.log(`Data saved successfully to ${fileName}`);
     } catch (error) {
         console.error('Error retrieving Google Analytics data:', error);
+        throw error;
     }
 }
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
-
-rl.question('Enter the start date (YYYY-MM-DD): ', (startDate) => {
-    rl.question('Enter the end date (YYYY-MM-DD): ', (endDate) => {
-        rl.close();
-        getGoogleAnalyticsData(startDate, endDate)
-            .then(() => {
-                console.log('Data retrieval successful');
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    });
-});
 
 function formatRevenue(value) {
     const formatter = new Intl.NumberFormat('en-US', {
@@ -107,3 +86,27 @@ function formatRevenue(value) {
     });
     return formatter.format(value);
 }
+
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    const html = fs.readFileSync('./public/index.html', 'utf8');
+    res.send(html);
+});
+
+app.post('/get-ga-data', async (req, res) => {
+    const { startDate, endDate } = req.body;
+
+    try {
+        const data = await getGoogleAnalyticsData(startDate, endDate);
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error retrieving data' });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
