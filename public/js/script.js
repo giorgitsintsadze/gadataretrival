@@ -2,7 +2,17 @@ $(document).ready(function() {
     const recordsPerPage = 10;
     let jsonData = [];
 
+    function showLoader() {
+        $('#loader').show();
+    }
+
+    function hideLoader() {
+        $('#loader').hide();
+    }
+
     function loadJSONData(startDate, endDate) {
+        showLoader();
+
         const fileName = `ga_data_${startDate}_${endDate}.json`;
 
         $.get('/check-file-exists', { fileName: fileName }, function(data) {
@@ -11,12 +21,14 @@ $(document).ready(function() {
                     jsonData = data;
                     displayData(1);
                     displayPagination();
+                    hideLoader();
                 });
             } else {
                 $.post('/get-ga-data', { startDate: startDate, endDate: endDate }, function(data) {
                     jsonData = data;
                     displayData(1);
                     displayPagination();
+                    hideLoader();
                 });
             }
         });
@@ -31,17 +43,20 @@ $(document).ready(function() {
         const paginatedData = jsonData.slice(startIndex, endIndex);
 
         if (paginatedData.length > 0) {
+            // ascending order
+            paginatedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
             for (const row of paginatedData) {
                 const rowHtml = `
-              <tr>
-                <td>${row.date}</td>
-                <td>${row.sessions}</td>
-                <td>${row.newUsers}</td>
-                <td>${row.totalRevenue}</td>
-                <td>${row.transactions}</td>
-                <td>${row.checkouts}</td>
-              </tr>
-            `;
+                            <tr>
+                                <td>${row.date}</td>
+                                <td>${row.sessions}</td>
+                                <td>${row.newUsers}</td>
+                                <td>${row.totalRevenue}</td>
+                                <td>${row.transactions}</td>
+                                <td>${row.checkouts}</td>
+                            </tr>
+                        `;
                 dataContainer.append(rowHtml);
             }
         } else {
@@ -97,9 +112,47 @@ $(document).ready(function() {
 
     $('form').submit(function(e) {
         e.preventDefault();
-        const startDate = $('#start-date').val();
-        const endDate = $('#end-date').val();
+        const rangeOption = $('#range-option').val();
+        let startDate, endDate;
 
-        loadJSONData(startDate, endDate);
+        switch (rangeOption) {
+            case '7days':
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                startDate = formatDate(sevenDaysAgo);
+                endDate = formatDate(new Date());
+                loadJSONData(startDate, endDate);
+                break;
+            case '30days':
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                startDate = formatDate(thirtyDaysAgo);
+                endDate = formatDate(new Date());
+                loadJSONData(startDate, endDate);
+                break;
+            case '90days':
+                const ninetyDaysAgo = new Date();
+                ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+                startDate = formatDate(ninetyDaysAgo);
+                endDate = formatDate(new Date());
+                loadJSONData(startDate, endDate);
+                break;
+            default:
+                startDate = $('#start-date').val();
+                endDate = $('#end-date').val();
+                if (!startDate || !endDate) {
+                    alert('Please select start and end dates.');
+                    return;
+                }
+                loadJSONData(startDate, endDate);
+                break;
+        }
     });
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 });

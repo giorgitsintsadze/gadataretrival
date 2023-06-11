@@ -5,35 +5,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="./styles/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="./js/script.js"></script>
+    <script src="js/script.js"></script>
 </head>
 <body>
 <div class="container">
     <h1>Google Analytics Data</h1>
-
     <form>
         <div class="row">
             <div class="col-md-3">
                 <div class="form-group">
+                    <label for="range-option">Select Range:</label>
+                    <select id="range-option" class="form-control">
+                        <option value="">Custom Range</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                        <option value="90days">Last 90 Days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
                     <label for="start-date">Start Date:</label>
-                    <input type="date" id="start-date" class="form-control" required>
+                    <input type="date" id="start-date" class="form-control">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="end-date">End Date:</label>
-                    <input type="date" id="end-date" class="form-control" required>
+                    <input type="date" id="end-date" class="form-control">
                 </div>
             </div>
             <div class="col-md-3 prim-btn">
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Fetch Data</button>
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-primary">Get Data</button>
                 </div>
             </div>
         </div>
     </form>
 
-    <table class="table table-striped">
+    <table class="table">
         <thead>
         <tr>
             <th>Date</th>
@@ -45,15 +56,19 @@
         </tr>
         </thead>
         <tbody id="data-container">
-        <!-- Data will be inserted here ddynamically -->
+        <!-- Data will be dynamically added here -->
         </tbody>
     </table>
 
-    <nav aria-label="Pagination">
-        <ul class="pagination justify-content-center" id="pagination-container">
-            <!-- pagination links will be here dinamically-->
+    <nav>
+        <ul class="pagination" id="pagination-container">
+            <!-- Pagination will be dynamically added here -->
         </ul>
     </nav>
+
+    <div id="loader">
+        <img src="https://icons8.com/preloaders/generator.php?image=1476&speed=9&fore_color=000000&back_color=FFFFFF&size=64x64&transparency=0&reverse=0&orig_colors=0&gray_transp=0&image_type=1&inverse=0&flip=0&frames_amount=28&word=237-261-157-41-266-237-41-257-237-266-57-41-227-41-36-36-36&download" alt="Loader" href="">
+    </div>
 </div>
 </body>
 </html>

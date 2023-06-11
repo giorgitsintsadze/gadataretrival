@@ -97,7 +97,24 @@ app.get('/', (req, res) => {
 });
 
 app.post('/get-ga-data', async (req, res) => {
-    const { startDate, endDate } = req.body;
+    const { range } = req.body;
+    let startDate, endDate;
+
+    // Calculate start and end dates based on selected range
+    if (range === '7days') {
+        endDate = DateTime.local().toFormat('yyyy-MM-dd');
+        startDate = DateTime.local().minus({ days: 6 }).toFormat('yyyy-MM-dd');
+    } else if (range === '30days') {
+        endDate = DateTime.local().toFormat('yyyy-MM-dd');
+        startDate = DateTime.local().minus({ days: 29 }).toFormat('yyyy-MM-dd');
+    } else if (range === '90days') {
+        endDate = DateTime.local().toFormat('yyyy-MM-dd');
+        startDate = DateTime.local().minus({ days: 89 }).toFormat('yyyy-MM-dd');
+    } else {
+        // Invalid range
+        return res.status(400).json({ error: 'Invalid range' });
+    }
+
     const fileName = `ga_data_${startDate}_${endDate}.json`;
 
     try {
