@@ -1,0 +1,40 @@
+body {
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    text-align: center;
+}
+
+td {
+    text-align: center;
+}
+
+.no-data {
+    text-align: center;
+    font-style: italic;
+}
+
+.pagination {
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.prim-btn {
+    padding-top: 23px;
+}
+.form-group {
+    margin-top: 22px;
+}
