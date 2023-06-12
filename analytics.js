@@ -3,6 +3,7 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const key = require('./key-ga.json');
 const fs = require('fs');
 const { DateTime } = require('luxon');
+const saveInDb = require('./saveInDb');
 
 const app = express();
 const port = 3000;
@@ -64,6 +65,24 @@ async function getGoogleAnalyticsData(startDate, endDate) {
             const rowData = [formattedDate, ...row.metrics];
             const revenue = parseFloat(rowData[3]);
             const formattedRevenue = formatRevenue(revenue);
+
+            const params = [
+                formattedDate,
+                rowData[1],
+                rowData[2],
+                revenue,
+                rowData[4],
+                rowData[5],
+            ];
+
+            saveInDb(params, (err, result) => {
+                if (err) {
+                    console.error('Error saving data to database:', err);
+                } else {
+                    console.log('Data saved to database successfully');
+                }
+            });
+
             return {
                 date: formattedDate,
                 sessions: rowData[1],
@@ -111,7 +130,6 @@ app.post('/get-ga-data', async (req, res) => {
         endDate = DateTime.local().toFormat('yyyy-MM-dd');
         startDate = DateTime.local().minus({ days: 89 }).toFormat('yyyy-MM-dd');
     } else {
-
         return res.status(400).json({ error: 'Invalid range' });
     }
 
@@ -120,7 +138,6 @@ app.post('/get-ga-data', async (req, res) => {
     try {
         const data = await getGoogleAnalyticsData(startDate, endDate);
 
-        // Write data to a JSON file
         fs.writeFile(fileName, JSON.stringify(data), (err) => {
             if (err) {
                 console.error('Error writing data to file:', err);
