@@ -5,6 +5,8 @@
     "@google-analytics/data": "^3.2.2",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
-    "luxon": "^3.3.0"
+    "luxon": "^3.3.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.3.4"
   }
 }

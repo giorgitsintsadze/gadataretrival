@@ -111,7 +111,7 @@ app.post('/get-ga-data', async (req, res) => {
         endDate = DateTime.local().toFormat('yyyy-MM-dd');
         startDate = DateTime.local().minus({ days: 89 }).toFormat('yyyy-MM-dd');
     } else {
-        // Invalid range
+
         return res.status(400).json({ error: 'Invalid range' });
     }
 

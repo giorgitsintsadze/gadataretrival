@@ -24,11 +24,21 @@ $(document).ready(function() {
                     hideLoader();
                 });
             } else {
-                $.post('/get-ga-data', { startDate: startDate, endDate: endDate }, function(data) {
-                    jsonData = data;
-                    displayData(1);
-                    displayPagination();
-                    hideLoader();
+                $.ajax({
+                    url: '/get-ga-data',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ range: $('#range-option').val() }),
+                    success: function(data) {
+                        jsonData = data;
+                        displayData(1);
+                        displayPagination();
+                        hideLoader();
+                    },
+                    error: function(error) {
+                        console.error('Error retrieving data:', error);
+                        hideLoader();
+                    }
                 });
             }
         });
