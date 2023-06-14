@@ -1,97 +1,84 @@
+/* General Styles */
 body {
+    font-family: Arial, sans-serif;
+    margin: 0;
     padding: 20px;
 }
 
 h1 {
-    margin-bottom: 20px;
-}
-
-form {
-    margin-bottom: 20px;
-}
-
-table {
-    width: 100%;
-}
-
-th {
     text-align: center;
 }
 
-td {
-    text-align: center;
+h2 {
+    margin-top: 30px;
 }
 
-.no-data {
-    text-align: center;
-    font-style: italic;
+ul {
+    list-style-type: none;
+    padding: 0;
 }
 
-.pagination {
-    margin-top: 20px;
-    justify-content: center;
+li {
+    margin-bottom: 10px;
 }
 
-.prim-btn {
-    padding-top: 23px;
-}
-.form-group {
-    margin-top: 22px;
-}
-
-.loader {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+/* Data Container */
+#data-container {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.loader:before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: -16px;
-    margin-left: -16px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
+/* Narrative Container */
+#narrative-container {
+    margin-top: 30px;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
+/* Form */
+.form-container {
+    margin-top: 30px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.no-data {
-    text-align: center;
+.form-container label {
+    display: block;
+    margin-bottom: 5px;
     font-weight: bold;
-    background: transparent;
-    padding: 10px;
 }
 
-#loader img {
-    width: 50px;
-    height: 50px;
+.form-container input[type="date"] {
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
 }
 
-#loader {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.form-container input[type="submit"] {
+    padding: 10px 20px;
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Styling for Result Display */
+.result-container {
+    margin-top: 30px;
+}
+
+.result-container ul {
+    padding-left: 20px;
+}
+
+.result-container strong {
+    margin-right: 5px;
+}
+
+/* Custom Styles for Business Narrative */
+#narrative {
+    font-style: italic;
 }
